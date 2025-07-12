@@ -37,7 +37,7 @@ jobs:
         id: sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Determine next version (example: using semantic-release)
+      - name: Determine next version
         id: semantic-release
         uses: cycjimmy/semantic-release-action@v4
         with:
