@@ -1,0 +1,29 @@
+package org.codevoke.probnb.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.Instant;
+
+@Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class HostReservation {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Instant startDate;
+    private Instant endDate;
+
+    @ManyToOne
+    @JoinColumn(name = "users_id")
+    private User host;
+
+    @ManyToOne
+    @JoinColumn(name = "room_id")
+    private Room room;
+}
