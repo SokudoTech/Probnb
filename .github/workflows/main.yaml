@@ -7,6 +7,10 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      new_release_published: ${{ steps.semantic-release.outputs.new_release_published }}
+      new_release_version: ${{ steps.semantic-release.outputs.new_release_version }}
+      project: ${{ steps.changed-project.outputs.project }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -22,7 +26,6 @@ jobs:
           else
             echo "project=unknown" >> $GITHUB_OUTPUT
           fi
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -58,7 +61,6 @@ jobs:
           docker tag ghcr.io/${{ github.repository }}/client:${{ steps.sha.outputs.sha_short }} ghcr.io/${{ github.repository }}/client:${{ steps.semantic-release.outputs.new_release_version }}
           docker push ghcr.io/${{ github.repository }}/client:${{ steps.semantic-release.outputs.new_release_version }}
           echo "Pushed client release tag ${{ steps.semantic-release.outputs.new_release_version }}"
-
       - name: Push server tagged image
         if: ${{ steps.changed-project.outputs.project == 'server' && steps.semantic-release.outputs.new_release_published == 'true' }}
         run: |
@@ -69,14 +71,14 @@ jobs:
   add_release_label:
     needs: release
     runs-on: ubuntu-latest
-    if: ${{ needs.release.result == 'success' && steps.semantic-release.outputs.new_release_published == 'true' }}
+    if: ${{ needs.release.result == 'success' && needs.release.outputs.new_release_published == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Add release label
         run: |
-          gh pr edit "$GITHUB_REF_NAME" --add-label "RELEASE-${{ steps.semantic-release.outputs.new_release_version }}"
+          gh pr edit "$GITHUB_REF_NAME" --add-label "RELEASE-${{ needs.release.outputs.new_release_version }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
