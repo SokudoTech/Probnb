@@ -16,10 +16,10 @@ RUN mvn clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine AS runtime
 
-RUN apk add --no-cache curl
+RUN apk update && apk upgrade --no-cache curl
 
-RUN addgroup -g 1001 appgroup && \
-    adduser -u 1001 -G appgroup appuser
+RUN getent group appgroup || addgroup -g 1001 appgroup
+RUN getent passwd appuser || adduser -v -u 1001 -G appgroup appuser
 
 WORKDIR /app
 
