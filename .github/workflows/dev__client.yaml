@@ -9,6 +9,16 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target_arch: [linux/amd64, linux/arm64]
+        image_tag: [latest, macos-latest]
+        include:
+          - target_arch: linux/amd64
+            image_tag: latest
+          - target_arch: linux/arm64
+            image_tag: macos-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -35,22 +45,11 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: client
-          file: client/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          file: client/Dockerfile.${{ matrix.target_arch }}
+          platforms: ${{ matrix.target_arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:latest
-            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:dev
-            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ steps.sha.outputs.sha_short }}
-
-  add_label:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Add label
-        run: |
-          gh pr edit "$PR_URL" --add-label "client"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ matrix.image_tag }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ steps.sha.outputs.sha_short }}-${{ matrix.image_tag }}
