@@ -18,8 +18,8 @@ FROM eclipse-temurin:17-jre-alpine AS runtime
 
 RUN apk add --no-cache curl
 
-RUN addgroup -g 1001 -S appgroup && \
-    adduser -u 1001 -S appuser -G appgroup
+RUN addgroup -g 1001 appgroup && \
+    adduser -u 1001 -G appgroup appuser
 
 WORKDIR /app
 
