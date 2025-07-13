@@ -19,7 +19,8 @@ FROM eclipse-temurin:17-jre-alpine AS runtime
 RUN apk update && apk upgrade --no-cache curl
 
 RUN getent group appgroup || addgroup -g 1001 appgroup
-RUN getent passwd appuser || adduser -v -u 1001 -G appgroup appuser
+
+RUN sh -c "if ! getent passwd appuser; then adduser -u 1001 -G appgroup appuser; fi"
 
 WORKDIR /app
 
