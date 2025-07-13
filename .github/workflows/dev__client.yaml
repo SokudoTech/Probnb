@@ -18,6 +18,9 @@ jobs:
           - target_arch: linux/arm64
             image_tag: macos-latest
             dockerfile: Dockerfile.arm64
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
