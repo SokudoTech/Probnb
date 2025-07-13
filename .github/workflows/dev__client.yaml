@@ -11,9 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target_arch: [linux/amd64, linux/arm64]
-        dockerfile: [Dockerfile.amd64, Dockerfile.arm64]
-        image_tag: [latest, macos-latest]
+        include:
           - target_arch: linux/amd64
             image_tag: latest
             dockerfile: Dockerfile.amd64
