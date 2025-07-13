@@ -1,4 +1,4 @@
-name: Build and Push Docker Image (Dev)
+name: Build and Push Docker Image (Dev) - Server
 
 on:
   push:
@@ -27,6 +27,10 @@ jobs:
         id: sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Convert repository name to lowercase
+        id: lowercase_repo
+        run: echo "repo_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -37,9 +41,9 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            ghcr.io/${{ tolower(github.repository) }}/server:latest
-            ghcr.io/${{ tolower(github.repository) }}/server:dev
-            ghcr.io/${{ tolower(github.repository) }}/server:${{ steps.sha.outputs.sha_short }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/server:latest
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/server:dev
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/server:${{ steps.sha.outputs.sha_short }}
 
   add_label:
     runs-on: ubuntu-latest
