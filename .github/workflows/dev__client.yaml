@@ -37,9 +37,9 @@ jobs:
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/client:latest
-            ghcr.io/${{ github.repository }}/client:dev
-            ghcr.io/${{ github.repository }}/client:${{ steps.sha.outputs.sha_short }}
+            ghcr.io/${{ tolower(github.repository) }}/client:latest
+            ghcr.io/${{ tolower(github.repository) }}/client:dev
+            ghcr.io/${{ tolower(github.repository) }}/client:${{ steps.sha.outputs.sha_short }}
   
   add_label:
     runs-on: ubuntu-latest
