@@ -15,9 +15,11 @@ jobs:
           - target_arch: linux/amd64
             image_tag: latest
             dockerfile: Dockerfile.amd64
+            short_arch: amd64
           - target_arch: linux/arm64
             image_tag: macos-latest
             dockerfile: Dockerfile.arm64
+            short_arch: arm64
     permissions:
       contents: read
       packages: write
@@ -55,4 +57,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ matrix.image_tag }}
-            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ steps.sha.outputs.sha_short }}-${{ matrix.image_tag }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ steps.sha.outputs.sha_short }}-${{ matrix.short_arch }}
