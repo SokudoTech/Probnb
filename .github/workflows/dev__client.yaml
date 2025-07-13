@@ -12,6 +12,7 @@ jobs:
     strategy:
       matrix:
         target_arch: [linux/amd64, linux/arm64]
+        dockerfile: [Dockerfile.amd64, Dockerfile.arm64]
         image_tag: [latest, macos-latest]
         include:
           - target_arch: linux/amd64
@@ -45,7 +46,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: client
-          file: client/Dockerfile.${{ matrix.target_arch }}
+          file: client/${{ matrix.dockerfile }}
           platforms: ${{ matrix.target_arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
