@@ -17,8 +17,10 @@ jobs:
         include:
           - target_arch: linux/amd64
             image_tag: latest
+            dockerfile: Dockerfile.amd64
           - target_arch: linux/arm64
             image_tag: macos-latest
+            dockerfile: Dockerfile.arm64
 
     steps:
       - name: Checkout code
