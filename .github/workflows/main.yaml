@@ -7,10 +7,9 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    outputs:
-      new_release_published: ${{ steps.semantic-release.outputs.new_release_published }}
-      new_release_version: ${{ steps.semantic-release.outputs.new_release_version }}
-      project: ${{ steps.changed-project.outputs.project }}
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -58,14 +57,14 @@ jobs:
       - name: Push client tagged image
         if: ${{ steps.changed-project.outputs.project == 'client' && steps.semantic-release.outputs.new_release_published == 'true' }}
         run: |
-          docker tag ghcr.io/${{ github.repository }}/client:${{ steps.sha.outputs.sha_short }} ghcr.io/${{ github.repository }}/client:${{ steps.semantic-release.outputs.new_release_version }}
-          docker push ghcr.io/${{ github.repository }}/client:${{ steps.semantic-release.outputs.new_release_version }}
+          docker tag ghcr.io/${{ tolower( github.repository ) }}/client:${{ steps.sha.outputs.sha_short }} ghcr.io/${{ tolower( github.repository ) }}/client:${{ steps.semantic-release.outputs.new_release_version }}
+          docker push ghcr.io/${{ tolower( github.repository ) }}/client:${{ steps.semantic-release.outputs.new_release_version }}
           echo "Pushed client release tag ${{ steps.semantic-release.outputs.new_release_version }}"
       - name: Push server tagged image
         if: ${{ steps.changed-project.outputs.project == 'server' && steps.semantic-release.outputs.new_release_published == 'true' }}
         run: |
-          docker tag ghcr.io/${{ github.repository }}/server:${{ steps.sha.outputs.sha_short }} ghcr.io/${{ github.repository }}/server:${{ steps.semantic-release.outputs.new_release_version }}
-          docker push ghcr.io/${{ github.repository }}/server:${{ steps.semantic-release.outputs.new_release_version }}
+          docker tag ghcr.io/${{ tolower(github.repository) }}/server:${{ steps.sha.outputs.sha_short }} ghcr.io/${{ tolower( github.repository  ) }}/server:${{ steps.semantic-release.outputs.new_release_version }}
+          docker push ghcr.io/${{ tolower(github.repository) }}/server:${{ steps.semantic-release.outputs.new_release_version }}
           echo "Pushed server release tag ${{ steps.semantic-release.outputs.new_release_version }}"
 
   add_release_label:
@@ -78,7 +77,7 @@ jobs:
 
       - name: Add release label
         run: |
-          gh pr edit "$GITHUB_REF_NAME" --add-label "RELEASE-${{ needs.release.outputs.new_release_version }}"
+          gh pr edit "$GITHUB_REF_NAME" --add-label "RELEASE-${{ steps.semantic-release.outputs.new_release_version }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF_NAME: ${{ github.ref_name }}

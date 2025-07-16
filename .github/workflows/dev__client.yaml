@@ -1,4 +1,4 @@
-name: Build and Push Docker Image (Dev)
+name: Build and Push Docker Image (Dev) - Client
 
 on:
   push:
@@ -9,6 +9,21 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target_arch: linux/amd64
+            image_tag: latest
+            dockerfile: Dockerfile.amd64
+            short_arch: amd64
+          - target_arch: linux/arm64
+            image_tag: macos-latest
+            dockerfile: Dockerfile.arm64
+            short_arch: arm64
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -27,27 +42,19 @@ jobs:
         id: sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Convert repository name to lowercase
+        id: lowercase_repo
+        run: echo "repo_lower=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: client
-          file: client/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          file: client/${{ matrix.dockerfile }}
+          platforms: ${{ matrix.target_arch }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/client:latest
-            ghcr.io/${{ github.repository }}/client:dev
-            ghcr.io/${{ github.repository }}/client:${{ steps.sha.outputs.sha_short }}
-  
-  add_label:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Add label
-        run: |
-          gh pr edit "$PR_URL" --add-label "client"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_URL: ${{ github.event.pull_request.html_url }}
-
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ matrix.image_tag }}
+            ghcr.io/${{ steps.lowercase_repo.outputs.repo_lower }}/client:${{ steps.sha.outputs.sha_short }}-${{ matrix.short_arch }}
